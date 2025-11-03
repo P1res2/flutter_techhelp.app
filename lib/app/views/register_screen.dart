@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_techhelp_app/core/constants.dart';
+import 'package:flutter_techhelp_app/app/utils/constants.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:br_validators/br_validators.dart';
+import '../controllers/auth_controller.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -23,17 +24,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
   );
 
   final phoneFormatter = MaskTextInputFormatter(
-    mask: '(##) #####-####',
+    mask: '(##)#####-####',
     filter: {"#": RegExp(r'[0-9]')},
   );
 
-  String _accountType = "Fisica";
+  final AuthController _authController = AuthController();
+
   bool _isPessoaFisica = true;
   bool _showPassword = false;
   bool _showConfirmPassword = false;
+  String _accountType = "Fisica";
+
+  final TextEditingController _nomeController = TextEditingController();
+  final TextEditingController _telefoneController = TextEditingController();
+  final TextEditingController _cpfCnpjController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _senha1Controller = TextEditingController();
+  final TextEditingController _senha2Controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(32.0),
@@ -57,7 +69,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       children: [
                         Expanded(
                           child: TextField(
-                            decoration: const InputDecoration(label: Text("Nome")),
+                            decoration: const InputDecoration(
+                              label: Text("Nome"),
+                            ),
+                            controller: _nomeController,
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -65,14 +80,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: TextField(
                             decoration: const InputDecoration(
                               label: Text("Telefone"),
-                              hintText: "(99) 91234-5678",
+                              hintText: "(00)90000-0000",
                             ),
+                            controller: _telefoneController,
                             keyboardType: TextInputType.phone,
                             inputFormatters: [phoneFormatter],
                           ),
                         ),
                       ],
                     ),
+
+                    const SizedBox(height: 16),
 
                     // CPF/CNPJ e tipo de conta
                     Row(
@@ -82,6 +100,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             decoration: InputDecoration(
                               label: Text(_isPessoaFisica ? "CPF" : "CNPJ"),
                             ),
+                            controller: _cpfCnpjController,
                             keyboardType: TextInputType.number,
                             inputFormatters: [
                               _isPessoaFisica ? cpfFormatter : cnpjFormatter,
@@ -107,12 +126,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ],
                     ),
 
+                    const SizedBox(height: 16),
+
                     // Email
-                    TextField(
-                      decoration: const InputDecoration(
-                        label: Text("Email"),
-                        hintText: "exemplo@email.com",
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            decoration: const InputDecoration(
+                              label: Text("Email"),
+                              hintText: "exemplo@email.com",
+                            ),
+                            controller: _emailController,
+                          ),
+                        ),
+                      ],
                     ),
 
                     const SizedBox(height: 16),
@@ -138,6 +166,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 ),
                               ),
                             ),
+                            controller: _senha1Controller,
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -149,7 +178,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               suffixIcon: IconButton(
                                 onPressed: () {
                                   setState(() {
-                                    _showConfirmPassword = !_showConfirmPassword;
+                                    _showConfirmPassword =
+                                        !_showConfirmPassword;
                                   });
                                 },
                                 icon: Icon(
@@ -159,6 +189,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 ),
                               ),
                             ),
+                            controller: _senha2Controller,
                           ),
                         ),
                       ],
@@ -171,7 +202,83 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            // Verifica se o número de telefone é válido
+                            if (!BRValidators.validateMobileNumber(
+                              _telefoneController.text,
+                            )) {
+                              messenger.showSnackBar(
+                                SnackBar(
+                                  content: Text("Número de telefone inválido!"),
+                                ),
+                              );
+                            }
+
+                            // Verifica se o Cpf/Cnpj é válido
+                            if (_isPessoaFisica
+                                ? !BRValidators.validateCPF(
+                                    _cpfCnpjController.text,
+                                  )
+                                : !BRValidators.validateCNPJ(
+                                    _cpfCnpjController.text,
+                                  )) {
+                              messenger.showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    _isPessoaFisica
+                                        ? "Cpf inválido!"
+                                        : "Cnpj inválido!",
+                                  ),
+                                ),
+                              );
+                            }
+
+                            // Verifica se o Email é válido
+                            if (!_emailController.text.contains("@") ||
+                                !_emailController.text.contains(".com")) {
+                              messenger.showSnackBar(
+                                const SnackBar(
+                                  content: Text('Email inválido!'),
+                                ),
+                              );
+                            }
+
+                            // Verifica se as senhas são iguais
+                            if (_senha1Controller.text !=
+                                _senha2Controller.text) {
+                              messenger.showSnackBar(
+                                const SnackBar(
+                                  content: Text('As senhas devem ser iguais.'),
+                                ),
+                              );
+                            }
+
+                            // Verifica se todos os campos estão preenchidos
+                            if (_nomeController.text.isEmpty ||
+                                _telefoneController.text.isEmpty ||
+                                _telefoneController.text.isEmpty ||
+                                _emailController.text.isEmpty ||
+                                _senha1Controller.text.isEmpty ||
+                                _senha2Controller.text.isEmpty) {
+                              messenger.showSnackBar(
+                                const SnackBar(
+                                  content: Text('Preencha todos os campos!'),
+                                ),
+                              );
+                              return;
+                            }
+
+                            // Tenta registrar os dados passados
+                            _authController.register(
+                              context: context,
+                              nomeRazao: _nomeController.text,
+                              telefone: _telefoneController.text,
+                              cpfCnpj: _cpfCnpjController.text,
+                              tipo: _accountType,
+                              email: _emailController.text,
+                              password: _senha1Controller.text,
+                            );
+                          },
                           child: const Text("Cadastrar"),
                         ),
                       ],
