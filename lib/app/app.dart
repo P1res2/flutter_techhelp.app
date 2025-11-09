@@ -10,8 +10,8 @@ class TechhelpApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "TechHelp",
-      theme: AppTheme.darkTheme,
-      initialRoute: AppRoutes.home,
+      theme: AppTheme.lightTheme,
+      initialRoute: AppRoutes.start,
       routes: appRoutes,
     );
   }

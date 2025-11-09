@@ -3,17 +3,23 @@ import '../services/auth_service.dart';
 
 class AuthController {
   final AuthService _authService = AuthService();
+  BuildContext context;
+
+  late final NavigatorState navigator;
+  late final ScaffoldMessengerState messenger;
+
+  AuthController({required this.context}) {
+    navigator = Navigator.of(context);
+    messenger = ScaffoldMessenger.of(context);
+  }
 
   Future<void> login({
     required BuildContext context,
     required String email,
     required String password,
   }) async {
-    NavigatorState navigator = Navigator.of(context);
-    ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
-
     if (await _authService.login(email: email, password: password)) {
-      navigator.pushNamed('/chatbot');
+      navigator.pushNamed('/home', arguments: _authService.currentUser);
     } else {
       messenger.showSnackBar(
         const SnackBar(
@@ -24,6 +30,12 @@ class AuthController {
         ),
       );
     }
+  }
+
+  Future<void> logout() async {
+    await _authService.logout();
+    navigator.pop();
+    navigator.pop();
   }
 
   Future<void> register({

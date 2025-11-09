@@ -3,22 +3,26 @@ import '../models/cliente_model.dart';
 import '../services/api_service.dart';
 
 class AuthService {
-  // Puxa os usuarios(Clientes) da API
+  // Manipula os dados da API
   final ApiService _apiService = ApiService();
 
   String? _currentUserEmail;
+  String? _currentUserNomeRazao;
+  int? _currentUserId;
 
   // getter pro usuário logado
-  String? get currentUser => _currentUserEmail;
+  Map<dynamic, dynamic> get currentUser => {"id_cliente": _currentUserId, "nomeRazao": _currentUserNomeRazao, "email": _currentUserEmail};
 
   // login
   Future<bool> login({required String email, required String password}) async {
-    List<Cliente> users = await _apiService.getAll();
+    List<dynamic> users = await _apiService.getAll("/Clientes/");
 
-    for (Cliente cliente in users) {
-      if (cliente.email == email) {
+    for (Map user in users) {
+      if (user["email"] == email) {
         if (password == "123") {
+          _currentUserNomeRazao = user["nome_razao"];
           _currentUserEmail = email;
+          _currentUserId = user["id_cliente"];
           return true;
         }
       }
@@ -35,7 +39,7 @@ class AuthService {
     required String email,
     required String password,
   }) async {
-    List<Cliente> users = await _apiService.getAll();
+    List<dynamic> users = await _apiService.getAll("/Clientes/");
 
     for (Cliente cliente in users) {
       if (cliente.cpf_cnpj == cpfCnpj) return false;
@@ -54,8 +58,8 @@ class AuthService {
 
   // logout
   Future<void> logout() async {
-    await Future.delayed(const Duration(milliseconds: 500));
     _currentUserEmail = null;
+    _currentUserNomeRazao = null;
   }
 
   // verifica se está logado

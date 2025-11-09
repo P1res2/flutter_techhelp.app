@@ -19,7 +19,8 @@ class AppTheme {
     ),
     textTheme: const TextTheme(
       bodyLarge: TextStyle(color: AppColors.text, fontSize: 16),
-      bodyMedium: TextStyle(color: AppColors.textLight, fontSize: 14),
+      bodyMedium: TextStyle(color: AppColors.text, fontSize: 14),
+      bodySmall: TextStyle(color: Colors.white, fontSize: 14),
       titleLarge: TextStyle(
         color: AppColors.text,
         fontWeight: FontWeight.bold,

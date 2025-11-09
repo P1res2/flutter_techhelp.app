@@ -1,31 +1,20 @@
 // Implementar...
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/cliente_model.dart';
 import '../utils/constants.dart';
 
 class ApiService {
-  var urlClientes = urlClientesForDesktop;
-  // var urlClientes = urlClientesForAndroid;
+  final String _prefixUrlApi = prefixUrlApi;
 
-
-  // Get Clientes
-  Future<List<Cliente>> getAll() async {
-    http.Response response = await http.get(Uri.parse(urlClientes));
+  // Get all
+  Future<List<dynamic>> getAll(String sufixUrl) async {
+    http.Response response = await http.get(Uri.parse("$_prefixUrlApi$sufixUrl"));
 
     List<dynamic> listDynamic = json.decode(response.body);
-
-    List<Cliente> listClientes = [];
-
-    for (dynamic dyn in listDynamic) {
-      Map<String, dynamic> mapCliente = dyn as Map<String, dynamic>;
-      Cliente cliente = Cliente.fromMap(mapCliente);
-      listClientes.add(cliente);
-    }
-    return listClientes;
+    return listDynamic.toList();
   }
 
-  // Post Cliente
+  // Cria Cliente
   Future<void> postCliente({
     required String nomeRazao,
     required String telefone,
@@ -36,7 +25,7 @@ class ApiService {
   }) async {
     try {
       final response = await http.post(
-        Uri.parse(urlClientes),
+        Uri.parse("$prefixUrlApi/Clientes/"),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           "nome_razao": nomeRazao,
@@ -50,6 +39,37 @@ class ApiService {
 
       if (response.statusCode != 200 && response.statusCode != 201) {
         throw Exception('Erro ao criar cliente: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Falha na requisição: $e');
+    }
+  }
+
+  // Cria Chamado
+  Future<void> postChamado({
+    required int idCliente,
+    required String titulo,
+    required String descricao,
+    required String prioridade,
+    required String tipoAtendimento,
+    required String categoria,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$prefixUrlApi/Chamados/"),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "id_cliente": idCliente,
+          "titulo": titulo,
+          "descricao": descricao,
+          "prioridade": prioridade,
+          "tipo_atendimento": tipoAtendimento,
+          "categoria": categoria,
+        }),
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception('Erro ao criar chamado: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Falha na requisição: $e');

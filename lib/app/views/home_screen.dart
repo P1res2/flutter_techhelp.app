@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import '../controllers/auth_controller.dart';
+import '../views/widgets/chamados_list.dart';
 import '../utils/app_colors.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -7,27 +8,38 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AuthController authController = AuthController(context: context);
+    final usuario =
+        ModalRoute.of(context)!.settings.arguments as Map<dynamic, dynamic>;
+
     return Scaffold(
-      body: Container(
-        decoration: Theme.of(context).brightness == Brightness.light ? AppColors.backgroundLinearGradientLight : AppColors.backgroundLinearGradientDark,
-        child: Column(
-          children: [
-            const SizedBox(height: 200),
-
-            Image.asset("assets/images/techhelp_logo.png", scale: 4),
-
-            const SizedBox(height: 200),
-
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, "/login");
-                },
-                child: Text("Começar"),
-              ),
-            ),
-          ],
+      appBar: AppBar(
+        title: Text("TechHelp"),
+        leading: IconButton(
+          onPressed: authController.logout,
+          icon: Icon(Icons.logout),
         ),
+      ),
+      body: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Expanded(
+            child: Container(color: AppColors.accent, child: Column()),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(64.0),
+              child: ChamadosList(user: usuario),
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        label: Text("Chamado"),
+        icon: Icon(Icons.add),
+        onPressed: () {
+          Navigator.pushNamed(context, '/chatbot', arguments: usuario);
+        },
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_techhelp_app/app/utils/app_colors.dart';
+import '../services/openai_service.dart';
 
 class ChatbotScreen extends StatefulWidget {
   const ChatbotScreen({super.key});
@@ -10,34 +11,72 @@ class ChatbotScreen extends StatefulWidget {
 
 class _ChatbotScreenState extends State<ChatbotScreen> {
   final TextEditingController _controller = TextEditingController();
+  final OpenAIService _openAIService = OpenAIService();
   final List<Map<String, String>> _messages = [];
+  bool isLoading = false;
+  bool firstMsg = false;
+  String _response = '';
 
-  void _sendMessage() {
+  Map<dynamic, dynamic>? usuario;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    usuario ??=
+        ModalRoute.of(context)!.settings.arguments as Map<dynamic, dynamic>;
+  }
+
+  Future<void> _getResponse() async {
+    final text = _controller.text;
+    setState(() => _controller.clear());
+    if (text.isEmpty) return;
+
+    final reply = await _openAIService.sendMessage(
+      text,
+      usuario!['id_cliente'],
+    );
+    setState(() => _response = reply);
+  }
+
+  Future<void> _sendMessage() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
     setState(() {
       _messages.add({"sender": "user", "text": text});
-      _controller.clear();
+      isLoading = true;
+    });
 
-      // Aqui simular uma resposta automática
-      Future.delayed(const Duration(milliseconds: 700), () {
-        setState(() {
-          _messages.add({
-            "sender": "bot",
-            "text": "Você disse: $text 🤖"
-          });
-        });
+    await _getResponse();
+
+    setState(() {
+      _messages.add({"sender": "bot", "text": _response});
+      _messages.add({
+        "sender": "bot",
+        "text":
+            "Tem mais algum problema que você queira descrever ${usuario!["nomeRazao"]?.split(' ').first}?",
       });
+      isLoading = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    // final usuario =
+    //     ModalRoute.of(context)!.settings.arguments as Map<dynamic, dynamic>;
+
+    // Manda a primeira mensagem
+    while (!firstMsg) {
+      _messages.add({
+        "sender": "bot",
+        "text":
+            "Olá ${usuario!["nomeRazao"]?.split(' ').first}, descreva o seu problema para que eu possa criar um chamado.",
+      });
+      firstMsg = true;
+    }
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Chatbot"),
-      ),
+      appBar: AppBar(title: const Text("TechHelp")),
       body: Column(
         children: [
           Expanded(
@@ -49,47 +88,63 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                 final isUser = msg["sender"] == "user";
 
                 return Align(
-                  alignment:
-                      isUser ? Alignment.centerRight : Alignment.centerLeft,
+                  alignment: isUser
+                      ? Alignment.centerRight
+                      : Alignment.centerLeft,
                   child: Container(
                     margin: const EdgeInsets.symmetric(vertical: 4),
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 10,
+                      horizontal: 14,
+                    ),
                     decoration: BoxDecoration(
-                      color: isUser
-                          ? AppColors.primary
-                          : AppColors.darkBlue,
+                      color: isUser ? AppColors.primary : AppColors.darkBlue,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(msg["text"] ?? ""),
+                    child: Text(
+                      msg["text"] ?? "",
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                   ),
                 );
               },
             ),
           ),
           Container(
-            color: Colors.grey.shade100,
-            padding: const EdgeInsets.all(8),
+            color: AppColors.primary,
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
             child: Row(
               children: [
                 Expanded(
                   child: TextField(
                     controller: _controller,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: "Digite sua mensagem...",
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                     ),
+                    onEditingComplete: !isLoading ? _sendMessage : null,
+                    enabled: !isLoading,
                   ),
                 ),
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: const Icon(Icons.send),
-                  color: Colors.blueAccent,
-                  onPressed: _sendMessage,
-                )
+                const SizedBox(width: 16),
+                OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    shape: CircleBorder(),
+                    side: BorderSide(color: Colors.white, width: 1),
+                    padding: EdgeInsets.all(15),
+                  ),
+                  onPressed: !isLoading ? _sendMessage : null,
+                  child: const Icon(
+                    Icons.send_rounded,
+                    color: AppColors.secondary,
+                    size: 30,
+                  ),
+                ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
