@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/plataform_utils.dart';
 import '../controllers/auth_controller.dart';
 import '../views/widgets/chamados_list.dart';
 import '../utils/app_colors.dart';
@@ -8,9 +9,9 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AuthController authController = AuthController(context: context);
     final usuario =
         ModalRoute.of(context)!.settings.arguments as Map<dynamic, dynamic>;
+    AuthController authController = AuthController(context: context);
 
     return Scaffold(
       appBar: AppBar(
@@ -23,12 +24,13 @@ class HomeScreen extends StatelessWidget {
       body: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Expanded(
-            child: Container(color: AppColors.accent, child: Column()),
-          ),
+          if (PlatformUtils.isDesktop) 
+            Expanded(
+              child: Container(color: AppColors.accent, child: Column()),
+            ),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(64.0),
+              padding: (PlatformUtils.isMobile) ? const EdgeInsets.all(16.0) : const EdgeInsets.all(64.0),
               child: ChamadosList(user: usuario),
             ),
           ),

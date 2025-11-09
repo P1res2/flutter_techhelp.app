@@ -58,8 +58,8 @@ class ChamadoWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      "Prioridade: ${chamado["prioridade"]}",
-                      style: TextStyle(fontSize: 12),
+                      "Prioridade:${chamado["prioridade"]}",
+                      style: TextStyle(fontSize: 10),
                     ),
                     LinearProgressIndicator(
                       value: _getPriority(chamado["prioridade"]),

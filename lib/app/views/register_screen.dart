@@ -23,12 +23,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _senha1Controller = TextEditingController();
   final TextEditingController _senha2Controller = TextEditingController();
 
+  bool isLoading = false;
   bool _isPessoaFisica = true;
   String _accountType = "Fisica";
 
   @override
   Widget build(BuildContext context) {
-    final AuthController authController = AuthController(context: context);
     final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
     final Validators validators = Validators(context: context);
 
@@ -178,17 +178,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               }
 
                               // Registra os dados passados
-                              authController.register(
-                                context: context,
-                                nomeRazao: _nomeController.text,
-                                telefone: _telefoneController.text,
-                                cpfCnpj: _cpfCnpjController.text,
-                                tipo: _accountType,
-                                email: _emailController.text,
-                                password: _senha1Controller.text,
-                              );
+                              _onRegisterButtonClicked();
                             },
-                            child: const Text("Cadastrar"),
+                            style: ElevatedButton.styleFrom(fixedSize: const Size(136, 21)),
+                            child: (isLoading)
+                                ? SizedBox(
+                                    width: 21,
+                                    height: 21,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const Text("Cadastrar"),
                           ),
                         ],
                       ),
@@ -201,5 +202,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _onRegisterButtonClicked() async {
+    final AuthController authController = AuthController(context: context);
+
+    if (!isLoading) {
+      setState(() {
+        isLoading = true;
+      });
+
+      await authController.register(
+        context: context,
+        nomeRazao: _nomeController.text,
+        telefone: _telefoneController.text,
+        cpfCnpj: _cpfCnpjController.text,
+        tipo: _accountType,
+        email: _emailController.text,
+        password: _senha1Controller.text,
+      );
+
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 }
