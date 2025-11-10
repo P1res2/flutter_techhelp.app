@@ -1,16 +1,18 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_techhelp_app/app/services/chamado_service.dart';
+import 'package:flutter_techhelp_app/app/services/api_service.dart';
 import 'package:http/http.dart' as http;
 
 class OpenAIService {
   final String _apiKey = dotenv.env['API_KEY'] ?? '';
-  final ChamadoService _chamadoService = ChamadoService();
+  final ApiService _apiService = ApiService();
 
   Future<String> sendMessage(String msg, int idCliente) async {
     final url = Uri.parse("https://api.openai.com/v1/chat/completions");
-
-    String message = """Você é um assistente que transforma mensagens de usuários em um objeto JSON padronizado para abertura de chamados técnicos.
+    const String _sucessMessage = 'Eu criei um chamado para você, em breve um técnico entrara em contato para solucionar o seu problema. Confira a sua página inicial para ver os seus chamados.';
+    const String _failMessage = 'Não foi possivel criar o seu chamado no momento, tente novamente mais tarde.';
+    String message =
+        """Você é um assistente que transforma mensagens de usuários em um objeto JSON padronizado para abertura de chamados técnicos.
 
 Sempre retorne **apenas** um JSON no seguinte formato:
 {
@@ -62,19 +64,26 @@ Entrada:
     final body = jsonEncode({
       "model": "gpt-5-nano",
       "messages": [
-        {"role": "user", "content": message}
+        {"role": "user", "content": message},
       ],
-      "temperature": 1
+      "temperature": 1,
     });
 
     final response = await http.post(url, headers: headers, body: body);
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      await _chamadoService.createChamado(data["choices"][0]["message"]["content"]);
-      return 'Eu criei um chamado para você, em breve um técnico entrara em contato para solucionar o seu problema. Confira a sua página inicial para ver os seus chamados.';
+      try {
+        await _apiService.post(
+          '/Chamados/',
+          json.decode(data["choices"][0]["message"]["content"]),
+        );
+      } on Exception {
+        return _failMessage;
+      }
+      return _sucessMessage;
     } else {
-      return 'Não foi possivel criar o seu chamado no momento, tente novamente mais tarde.';
+      return _failMessage;
     }
   }
 }
