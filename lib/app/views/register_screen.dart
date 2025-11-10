@@ -180,7 +180,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               // Registra os dados passados
                               _onRegisterButtonClicked();
                             },
-                            style: ElevatedButton.styleFrom(fixedSize: const Size(136, 21)),
                             child: (isLoading)
                                 ? SizedBox(
                                     width: 21,
@@ -213,13 +212,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
       });
 
       await authController.register(
-        context: context,
-        nomeRazao: _nomeController.text,
-        telefone: _telefoneController.text,
-        cpfCnpj: _cpfCnpjController.text,
-        tipo: _accountType,
-        email: _emailController.text,
-        password: _senha1Controller.text,
+        tipo: TipoUsuario.cliente,
+        sufixUrl: '/Clientes/',
+        dados: {
+          "nome_razao": _nomeController.text,
+          "telefone": _telefoneController.text,
+          "cpf_cnpj": _cpfCnpjController.text,
+          "tipo": _accountType,
+          "email": _emailController.text,
+          "senha": _senha1Controller.text,
+        },
       );
 
       setState(() {

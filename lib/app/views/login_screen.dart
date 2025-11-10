@@ -105,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _onButtonLoginClicked() {
+  Future<void> _onButtonLoginClicked() async {
     final AuthController authController = AuthController(context: context);
 
     if (!isLoading) {
@@ -113,11 +113,15 @@ class _LoginScreenState extends State<LoginScreen> {
         isLoading = true;
       });
 
-      authController.login(
-        context: context,
+      await authController.login(
+        tipo: TipoUsuario.cliente,
         email: _emailController.text,
         password: _senhaController.text,
       );
+
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 }

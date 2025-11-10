@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_techhelp_app/app/models/cliente_model.dart';
+import '../models/tecnico_model.dart';
 import '../services/auth_service.dart';
+
+enum TipoUsuario { cliente, tecnico }
 
 class AuthController {
   final AuthService _authService = AuthService();
@@ -13,24 +17,44 @@ class AuthController {
     messenger = ScaffoldMessenger.of(context);
   }
 
+  // Faz login
   Future<void> login({
-    required BuildContext context,
+    required TipoUsuario tipo,
     required String email,
     required String password,
   }) async {
-    if (await _authService.login(email: email, password: password)) {
-      navigator.pushNamed('/home', arguments: _authService.currentUser);
-    } else {
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Essa conta não existe ou a senha está incorreta. Clique em Cadastrar-se para criar uma conta.',
-            style: TextStyle(fontWeight: FontWeight.w600),
-          ),
-        ),
-      );
+    switch (tipo) {
+      case TipoUsuario.cliente:
+        ClienteModel? user = await AuthService<ClienteModel>().login(
+          email: email,
+          password: password,
+          sufixUrl: '/Clientes/',
+          fromJson: ClienteModel.fromMapWithId,
+        );
+
+        if (user != null) {
+          navigator.pushNamed('/home', arguments: user);
+        } else {
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text("Essa conta não existe ou a senha está errada."),
+            ),
+          );
+        }
+        break;
+
+      case TipoUsuario.tecnico:
+        await AuthService<TecnicoModel>().login(
+          email: email,
+          password: password,
+          sufixUrl: '/Tecnicos/',
+          fromJson: TecnicoModel.fromMap,
+        );
+        break;
     }
   }
+
+  bool isLoggedIn() => _authService.isLoggedIn();
 
   Future<void> logout() async {
     await _authService.logout();
@@ -38,46 +62,44 @@ class AuthController {
     navigator.pop();
   }
 
+  // Registra um usuario
   Future<void> register({
-    required BuildContext context,
-    required String nomeRazao,
-    required String cpfCnpj,
-    required String tipo,
-    required String email,
-    required String telefone,
-    required String password,
+    required TipoUsuario tipo,
+    required String sufixUrl,
+    required Map<String, dynamic> dados,
   }) async {
-    NavigatorState navigator = Navigator.of(context);
-    ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
+    switch (tipo) {
+      case TipoUsuario.cliente:
+        final novoCliente = ClienteModel.fromMap(dados);
 
-    if (await _authService.register(
-      nomeRazao: nomeRazao,
-      cpfCnpj: cpfCnpj,
-      tipo: tipo,
-      email: email,
-      telefone: telefone,
-      password: password,
-    )) {
-      navigator.pop();
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Conta criada com sucesso!! Faça login.",
-            style: TextStyle(fontWeight: FontWeight.w600),
-          ),
-        ),
-      );
-    } else {
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Email ou Cpf/Cnpj já existe, faça login.',
-            style: TextStyle(fontWeight: FontWeight.w600),
-          ),
-        ),
-      );
+        if (await _authService.register(
+          sufixUrl: sufixUrl,
+          novoUsuario: novoCliente,
+          fromJson: ClienteModel.fromMap,
+        )) {
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text("A sua conta foi criada com sucesso! Faça login."),
+            ),
+          );
+          navigator.pop();
+        } else {
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text("Email ou Cpf/Cnpj já existe, tente fazer login."),
+            ),
+          );
+        }
+        break;
+
+      case TipoUsuario.tecnico:
+        final novoUsuario = TecnicoModel.fromMap(dados);
+
+        await _authService.register(
+          sufixUrl: sufixUrl,
+          novoUsuario: novoUsuario,
+          fromJson: TecnicoModel.fromMap,
+        );
     }
   }
-
-  bool isLoggedIn() => _authService.isLoggedIn();
 }

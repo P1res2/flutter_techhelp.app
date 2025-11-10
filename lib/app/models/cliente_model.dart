@@ -1,111 +1,64 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'dart:convert';
+import 'usuario_base_model.dart';
 
-class Cliente {
-  int id_cliente;
-  String nome_razao;
-  String cpf_cnpj;
-  String tipo;
-  String email;
-  String telefone;
-  DateTime created_at;
-  DateTime updated_at;
-  Cliente({
-    required this.id_cliente,
-    required this.nome_razao,
-    required this.cpf_cnpj,
+class ClienteModel implements UsuarioBase {
+  @override
+  final int? id;
+  @override
+  final String nomeRazao;
+  final String telefone;
+  @override
+  final String cpfCnpj;
+  final String tipo;
+  @override
+  final String email;
+  @override
+  final String password;
+
+  ClienteModel({
+    this.id,
+    required this.nomeRazao,
+    required this.telefone,
+    required this.cpfCnpj,
     required this.tipo,
     required this.email,
-    required this.telefone,
-    required this.created_at,
-    required this.updated_at,
+    required this.password,
   });
 
-  Cliente copyWith({
-    int? id_cliente,
-    String? nome_razao,
-    String? cpf_cnpj,
-    String? tipo,
-    String? email,
-    String? telefone,
-    DateTime? created_at,
-    DateTime? updated_at,
-  }) {
-    return Cliente(
-      id_cliente: id_cliente ?? this.id_cliente,
-      nome_razao: nome_razao ?? this.nome_razao,
-      cpf_cnpj: cpf_cnpj ?? this.cpf_cnpj,
-      tipo: tipo ?? this.tipo,
-      email: email ?? this.email,
-      telefone: telefone ?? this.telefone,
-      created_at: created_at ?? this.created_at,
-      updated_at: updated_at ?? this.updated_at,
+  @override
+  factory ClienteModel.fromMap(Map<String, dynamic> map) {
+    return ClienteModel(
+      nomeRazao: map['nome_razao'],
+      telefone: map['telefone'],
+      cpfCnpj: map['cpf_cnpj'],
+      tipo: map['tipo'],
+      email: map['email'],
+      password: map['senha'],
     );
   }
 
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'id_cliente': id_cliente,
-      'nome_razao': nome_razao,
-      'cpf_cnpj': cpf_cnpj,
-      'tipo': tipo,
-      'email': email,
-      'telefone': telefone,
-      'created_at': created_at.millisecondsSinceEpoch,
-      'updated_at': updated_at.millisecondsSinceEpoch,
-    };
+  factory ClienteModel.fromMapWithId(Map<String, dynamic> map) {
+    return ClienteModel(
+      id: map['id_cliente'],
+      nomeRazao: map['nome_razao'],
+      telefone: map['telefone'],
+      cpfCnpj: map['cpf_cnpj'],
+      tipo: map['tipo'],
+      email: map['email'],
+      password: map['senha'],
+    );
   }
-
-  factory Cliente.fromMap(Map<String, dynamic> map) {
-  return Cliente(
-    id_cliente: map['id_cliente'] as int,
-    nome_razao: map['nome_razao'] as String,
-    cpf_cnpj: map['cpf_cnpj'] as String,
-    tipo: map['tipo'] as String,
-    email: map['email'] as String,
-    telefone: map['telefone'] as String,
-    created_at: map['created_at'] is int
-        ? DateTime.fromMillisecondsSinceEpoch(map['created_at'])
-        : DateTime.parse(map['created_at']),
-    updated_at: map['updated_at'] is int
-        ? DateTime.fromMillisecondsSinceEpoch(map['updated_at'])
-        : DateTime.parse(map['updated_at']),
-  );
-}
-
-  String toJson() => json.encode(toMap());
-
-  factory Cliente.fromJson(String source) => Cliente.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
-  String toString() {
-    return 'Cliente(id_cliente: $id_cliente, nome_razao: $nome_razao, cpf_cnpj: $cpf_cnpj, tipo: $tipo, email: $email, telefone: $telefone, created_at: $created_at, updated_at: $updated_at)';
-  }
+  Map<String, dynamic> toMap() => {
+    "nome_razao": nomeRazao,
+    "telefone": telefone,
+    "cpf_cnpj": cpfCnpj,
+    "tipo": tipo,
+    "email": email,
+    "senha": password,
+  };
 
-  // @override
-  // bool operator ==(covariant Cliente other) {
-  //   if (identical(this, other)) return true;
-  
-  //   return 
-  //     other.id_cliente == id_cliente &&
-  //     other.nome_razao == nome_razao &&
-  //     other.cpf_cnpj == cpf_cnpj &&
-  //     other.tipo == tipo &&
-  //     other.email == email &&
-  //     other.telefone == telefone &&
-  //     other.created_at == created_at &&
-  //     other.updated_at == updated_at;
+  // int getId() {
+
   // }
-
-  @override
-  int get hashCode {
-    return id_cliente.hashCode ^
-      nome_razao.hashCode ^
-      cpf_cnpj.hashCode ^
-      tipo.hashCode ^
-      email.hashCode ^
-      telefone.hashCode ^
-      created_at.hashCode ^
-      updated_at.hashCode;
-  }
 }

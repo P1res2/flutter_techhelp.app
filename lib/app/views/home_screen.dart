@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_techhelp_app/app/models/usuario_base_model.dart';
 import '../utils/plataform_utils.dart';
 import '../controllers/auth_controller.dart';
 import '../views/widgets/chamados_list.dart';
@@ -10,7 +11,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final usuario =
-        ModalRoute.of(context)!.settings.arguments as Map<dynamic, dynamic>;
+        ModalRoute.of(context)!.settings.arguments as UsuarioBase;
     AuthController authController = AuthController(context: context);
 
     return Scaffold(

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_techhelp_app/app/models/chamado_model.dart';
 import 'package:flutter_techhelp_app/app/utils/app_colors.dart';
 import 'package:flutter_techhelp_app/app/views/widgets/edit_chamado_widget.dart';
 
 class ChamadoWidget extends StatelessWidget {
-  final Map chamado;
+  final ChamadoModel chamado;
   const ChamadoWidget({super.key, required this.chamado});
 
   @override
@@ -27,7 +28,7 @@ class ChamadoWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "${chamado["titulo"]}",
+                      chamado.titulo,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
@@ -35,11 +36,11 @@ class ChamadoWidget extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      "Status: ${chamado["status"]}",
+                      "Status: ${chamado.status}",
                       style: TextStyle(fontSize: 10),
                     ),
                     Text(
-                      chamado["descricao"],
+                      chamado.descricao,
                       style: TextStyle(fontSize: 12),
                       overflow: TextOverflow.clip,
                       maxLines: 3,
@@ -58,13 +59,13 @@ class ChamadoWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      "Prioridade:${chamado["prioridade"]}",
+                      "Prioridade:${chamado.prioridade}",
                       style: TextStyle(fontSize: 10),
                     ),
                     LinearProgressIndicator(
-                      value: _getPriority(chamado["prioridade"]),
+                      value: _getPriority(chamado.prioridade),
                       minHeight: 4,
-                      color: _getColorPriority(chamado["prioridade"]),
+                      color: _getColorPriority(chamado.prioridade),
                       borderRadius: BorderRadius.circular(3),
                     ),
 

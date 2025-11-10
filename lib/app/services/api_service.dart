@@ -7,11 +7,35 @@ class ApiService {
   final String _prefixUrlApi = prefixUrlApi;
 
   // Get all
-  Future<List<dynamic>> getAll(String sufixUrl) async {
-    http.Response response = await http.get(Uri.parse("$_prefixUrlApi$sufixUrl"));
+  Future<List<T>> getAll<T>(
+    String sufixUrl,
+    T Function(Map<String, dynamic>) fromJson,
+  ) async {
+    final response = await http.get(Uri.parse("$_prefixUrlApi$sufixUrl"));
 
-    List<dynamic> listDynamic = json.decode(response.body);
-    return listDynamic.toList();
+    if (response.statusCode != 200) {
+      throw Exception('Erro ao buscar dados: ${response.statusCode}');
+    }
+
+    final List<dynamic> data = json.decode(response.body);
+    return data.map((e) => fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  // Post
+  Future<void> post<T>(String sufixUrl, Map<String, dynamic> data) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$_prefixUrlApi$sufixUrl"),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(data),
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception('Erro ao criar registro: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Falha na requisição: $e');
+    }
   }
 
   // Cria Cliente
@@ -33,7 +57,7 @@ class ApiService {
           "tipo": tipo,
           "email": email,
           "telefone": telefone,
-          "password": password, // adiciona se necessário
+          "senha": password,
         }),
       );
 

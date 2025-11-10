@@ -1,69 +1,52 @@
-import 'dart:async';
-import '../models/cliente_model.dart';
-import '../services/api_service.dart';
+import '../models/usuario_base_model.dart';
+import 'api_service.dart';
 
-class AuthService {
-  // Manipula os dados da API
+class AuthService<T extends UsuarioBase> {
   final ApiService _apiService = ApiService();
 
-  String? _currentUserEmail;
-  String? _currentUserNomeRazao;
-  int? _currentUserId;
+  T? _currentUser;
+  T? get currentUser => _currentUser;
 
-  // getter pro usuário logado
-  Map<dynamic, dynamic> get currentUser => {"id_cliente": _currentUserId, "nomeRazao": _currentUserNomeRazao, "email": _currentUserEmail};
-
-  // login
-  Future<bool> login({required String email, required String password}) async {
-    List<dynamic> users = await _apiService.getAll("/Clientes/");
-
-    for (Map user in users) {
-      if (user["email"] == email) {
-        if (password == "123") {
-          _currentUserNomeRazao = user["nome_razao"];
-          _currentUserEmail = email;
-          _currentUserId = user["id_cliente"];
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  // registro
-  Future<bool> register({
-    required String nomeRazao,
-    required String telefone,
-    required String cpfCnpj,
-    required String tipo,
+  // Faz login
+  Future<T?> login({
     required String email,
     required String password,
+    required String sufixUrl,
+    required T Function(Map<String, dynamic>) fromJson,
   }) async {
-    List<dynamic> users = await _apiService.getAll("/Clientes/");
+    final List<T> users = await _apiService.getAll<T>(sufixUrl, fromJson);
 
-    for (Cliente cliente in users) {
-      if (cliente.cpf_cnpj == cpfCnpj) return false;
-      if (cliente.email == email) return false;
+    for (var user in users) {
+      print(user.id);
+      if (user.email == email && user.password == password) {
+        _currentUser = user;
+        return user;
+      }
     }
-    _apiService.postCliente(
-      nomeRazao: nomeRazao,
-      telefone: telefone,
-      cpfCnpj: cpfCnpj,
-      tipo: tipo,
-      email: email,
-      password: password,
-    );
-    return true;
+    return null;
   }
 
-  // logout
   Future<void> logout() async {
-    _currentUserEmail = null;
-    _currentUserNomeRazao = null;
+    _currentUser = null;
   }
 
-  // verifica se está logado
-  bool isLoggedIn() {
-    return _currentUserEmail != null;
+  bool isLoggedIn() => _currentUser != null;
+
+  // Registra um usuario
+  Future<bool> register({
+    required String sufixUrl,
+    required T novoUsuario,
+    required T Function(Map<String, dynamic>) fromJson,
+  }) async {
+    final List<T> users = await _apiService.getAll<T>(sufixUrl, fromJson);
+
+    // verifica se o email ou cpf/cnpj ja está cadastrado
+    for (var user in users) {
+      if (user.email == novoUsuario.email) return false;
+      if (user.cpfCnpj == novoUsuario.cpfCnpj) return false;
+    }
+
+    await _apiService.post<T>(sufixUrl, novoUsuario.toMap());
+    return true;
   }
 }
