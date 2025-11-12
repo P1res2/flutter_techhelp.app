@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_techhelp_app/app/services/api_service.dart';
 import 'package:http/http.dart' as http;
+import '../services/api_service.dart';
 
 class OpenAIService {
   final String _apiKey = dotenv.env['API_KEY'] ?? '';
@@ -9,8 +9,8 @@ class OpenAIService {
 
   Future<String> sendMessage(String msg, int idCliente) async {
     final url = Uri.parse("https://api.openai.com/v1/chat/completions");
-    const String _sucessMessage = 'Eu criei um chamado para você, em breve um técnico entrara em contato para solucionar o seu problema. Confira a sua página inicial para ver os seus chamados.';
-    const String _failMessage = 'Não foi possivel criar o seu chamado no momento, tente novamente mais tarde.';
+    const String sucessMessage = 'Eu criei um chamado para você, em breve um técnico entrara em contato para solucionar o seu problema. Confira a sua página inicial para ver os seus chamados.';
+    const String failMessage = 'Não foi possivel criar o seu chamado no momento, tente novamente mais tarde.';
     String message =
         """Você é um assistente que transforma mensagens de usuários em um objeto JSON padronizado para abertura de chamados técnicos.
 
@@ -79,11 +79,11 @@ Entrada:
           json.decode(data["choices"][0]["message"]["content"]),
         );
       } on Exception {
-        return _failMessage;
+        return failMessage;
       }
-      return _sucessMessage;
+      return sucessMessage;
     } else {
-      return _failMessage;
+      return failMessage;
     }
   }
 }

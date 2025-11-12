@@ -23,6 +23,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _senha1Controller = TextEditingController();
   final TextEditingController _senha2Controller = TextEditingController();
 
+  bool cpfCheck = false;
   bool isLoading = false;
   bool _isPessoaFisica = true;
   String _accountType = "Fisica";
@@ -125,6 +126,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ],
                       ),
 
+                      CheckboxListTile(
+                        title: _accountType == 'Fisica'
+                            ? Text(
+                                "Eu autorizo a plataforma a armazenar meu CPF.",
+                              )
+                            : Text(
+                                "Eu autorizo a plataforma a armazenar meu CNPJ.",
+                              ),
+                        value: cpfCheck,
+                        controlAffinity: ListTileControlAffinity.leading,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            cpfCheck = value!;
+                          });
+                        },
+                      ),
+
                       const SizedBox(height: 32), // Espaçamento
                       // Botão cadastrar
                       Row(
@@ -175,6 +193,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 _senha2Controller.text,
                               )) {
                                 return;
+                              }
+                              
+                              // Valida se o checho box de Cpf/Cnpj está marcado
+                              if (!cpfCheck) {
+                                // Se não marcou, mostra alerta
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      "Você precisa aceitar para continuar.",
+                                    ),
+                                  ),
+                                );
+                                return; // bloqueia ação
                               }
 
                               // Registra os dados passados
