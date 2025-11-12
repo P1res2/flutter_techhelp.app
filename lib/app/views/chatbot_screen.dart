@@ -96,6 +96,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                       ? Alignment.centerRight
                       : Alignment.centerLeft,
                   child: Container(
+                    constraints: BoxConstraints(maxWidth: 280),
                     margin: const EdgeInsets.symmetric(vertical: 4),
                     padding: const EdgeInsets.symmetric(
                       vertical: 10,
