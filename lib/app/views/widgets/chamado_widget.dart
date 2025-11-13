@@ -1,11 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_techhelp_app/app/models/chamado_model.dart';
+import 'package:flutter_techhelp_app/app/models/tecnico_model.dart';
+import 'package:flutter_techhelp_app/app/models/usuario_base_model.dart';
 import 'package:flutter_techhelp_app/app/utils/app_colors.dart';
 import 'package:flutter_techhelp_app/app/views/widgets/edit_chamado_widget.dart';
+import '../../services/api_service.dart';
 
 class ChamadoWidget extends StatelessWidget {
+  final ApiService _apiService = ApiService();
   final ChamadoModel chamado;
-  const ChamadoWidget({super.key, required this.chamado});
+  final UsuarioBase user;
+  ChamadoWidget({super.key, required this.chamado, required this.user});
+
+  Future<TecnicoModel> _getTecnico() async {
+    return await _apiService.getBy(
+      '/Tecnicos/${chamado.idTecnico}',
+      TecnicoModel.fromMapWithId,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,14 +83,46 @@ class ChamadoWidget extends StatelessWidget {
 
                     SizedBox(height: 8),
 
-                    IconButton(
-                      onPressed: () => showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        builder: (context) => EditChamadoWidget(),
+                    chamado.idTecnico == null
+                        ? const Text(
+                            'Técnico: Sem técnico',
+                          )
+                        : FutureBuilder(
+                            future:
+                                _getTecnico(), // retorna Future<TecnicoModel>
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Text('Carregando técnico...');
+                              } else if (snapshot.hasError) {
+                                return const Text('Erro ao carregar técnico');
+                              } else if (!snapshot.hasData) {
+                                return const Text('Nenhum técnico encontrado');
+                              } else {
+                                final tecnico = snapshot.data!;
+                                return Text('Técnico: ${tecnico.nomeRazao}');
+                              }
+                            },
+                          ),
+
+                    if (user.cpfCnpj == '')
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            onPressed: () => showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              builder: (context) => EditChamadoWidget(),
+                            ),
+                            icon: Icon(Icons.edit, color: Colors.white),
+                          ),
+                          IconButton(
+                            onPressed: () {},
+                            icon: Icon(Icons.add, color: Colors.white),
+                          ),
+                        ],
                       ),
-                      icon: Icon(Icons.edit, color: Colors.white),
-                    ),
                   ],
                 ),
               ),

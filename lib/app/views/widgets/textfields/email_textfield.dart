@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 class EmailTextfield extends StatelessWidget {
-  final TextEditingController emailController;
+  final TextEditingController controller;
+  bool readOnly = false;
 
-  const EmailTextfield({super.key, required this.emailController});
+  EmailTextfield({super.key, required this.controller, required this.readOnly});
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +13,8 @@ class EmailTextfield extends StatelessWidget {
         label: Text("Email"),
         hintText: "exemplo@email.com",
       ),
-      controller: emailController,
+      controller: controller,
+      readOnly: readOnly,
     );
   }
 }

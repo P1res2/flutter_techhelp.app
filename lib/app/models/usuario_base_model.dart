@@ -10,4 +10,8 @@ abstract class UsuarioBase {
   factory UsuarioBase.fromMap(Map<String, dynamic> map) {
     return UsuarioBase.fromMap(map);
   }
+
+  factory UsuarioBase.fromMapWithId(Map<String, dynamic> map) {
+    return UsuarioBase.fromMap(map);
+  }
 }

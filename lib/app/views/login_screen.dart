@@ -40,11 +40,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   constraints: BoxConstraints(maxWidth: 350, minWidth: 200),
                   child: Column(
                     children: [
-                      EmailTextfield(emailController: _emailController),
+                      EmailTextfield(controller: _emailController, readOnly: false,),
 
                       const SizedBox(height: 16), // ESPAÇAMENTO
 
-                      PasswordTextfield(controller: _senhaController),
+                      PasswordTextfield(controller: _senhaController, readOnly: false,),
 
                       const SizedBox(height: 32), // ESPAÇAMENTO
 
@@ -114,7 +114,6 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       await authController.login(
-        tipo: TipoUsuario.cliente,
         email: _emailController.text,
         password: _senhaController.text,
       );

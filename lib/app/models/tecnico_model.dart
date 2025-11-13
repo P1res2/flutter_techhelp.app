@@ -24,9 +24,10 @@ class TecnicoModel implements UsuarioBase {
     required this.password,
     this.ativo,
     this.especialidades,
-    this.idsEspecialidades
+    this.idsEspecialidades,
   });
 
+  // FromMap to post
   @override
   factory TecnicoModel.fromMap(Map<String, dynamic> map) {
     return TecnicoModel(
@@ -34,17 +35,18 @@ class TecnicoModel implements UsuarioBase {
       email: map['email'],
       telefone: map['telefone'],
       password: map['senha'],
-      idsEspecialidades: map['ids_especialidades']
+      idsEspecialidades: map['ids_especialidades'],
     );
   }
 
   factory TecnicoModel.fromMapWithId(Map<String, dynamic> map) {
     return TecnicoModel(
       id: map['id_tecnico'],
-      nomeRazao: map['nome_razao'],
+      nomeRazao: map['nome'],
       email: map['email'],
       telefone: map['telefone'],
       password: map['senha'],
+      especialidades: map['especialidades']
     );
   }
 

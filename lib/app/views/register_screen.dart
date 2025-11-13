@@ -59,7 +59,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       Row(
                         children: [
                           Expanded(
-                            child: NomeTextfield(controller: _nomeController),
+                            child: NomeTextfield(controller: _nomeController, readOnly: false,),
                           ),
                           const SizedBox(width: 16),
                           Expanded(
@@ -102,7 +102,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         children: [
                           Expanded(
                             child: EmailTextfield(
-                              emailController: _emailController,
+                              controller: _emailController,
+                              readOnly: false,
                             ),
                           ),
                         ],
@@ -115,12 +116,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           Expanded(
                             child: PasswordTextfield(
                               controller: _senha1Controller,
+                              readOnly: false,
                             ),
                           ),
                           const SizedBox(width: 16),
                           Expanded(
                             child: PasswordTextfield(
                               controller: _senha2Controller,
+                              readOnly: false,
                             ),
                           ),
                         ],

@@ -14,6 +14,7 @@ class EditChamadoWidget extends StatelessWidget {
           children: [
             Text("Editar chamado", style: TextStyle(fontSize: 20)),
             TextField(decoration: InputDecoration(labelText: "Título")),
+            SizedBox(height: 10),
             TextField(decoration: InputDecoration(labelText: "Descrição")),
             SizedBox(height: 10),
             ElevatedButton(

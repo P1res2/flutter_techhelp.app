@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_techhelp_app/app/models/usuario_base_model.dart';
-import 'package:flutter_techhelp_app/app/utils/app_colors.dart';
-import '../services/openai_service.dart';
+import 'package:flutter_techhelp_app/app/utils/constants.dart';
+import '../models/usuario_base_model.dart';
+import '../utils/app_colors.dart';
+import '../controllers/chamado_controller.dart';
+import '../utils/plataform_utils.dart';
 import 'widgets/TypingIndicator_widget.dart';
 
 class ChatbotScreen extends StatefulWidget {
@@ -13,7 +15,7 @@ class ChatbotScreen extends StatefulWidget {
 
 class _ChatbotScreenState extends State<ChatbotScreen> {
   final TextEditingController _controller = TextEditingController();
-  final OpenAIService _openAIService = OpenAIService();
+  final ChamadoController _chamadoController = ChamadoController();
   final List<Map<String, dynamic>> _messages = [];
   bool isLoading = false;
   bool firstMsg = false;
@@ -24,8 +26,17 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    usuario ??=
-        ModalRoute.of(context)!.settings.arguments as UsuarioBase;
+    usuario ??= ModalRoute.of(context)!.settings.arguments as UsuarioBase;
+
+    // Só adiciona a primeira mensagem uma vez
+    if (!firstMsg) {
+      _messages.add({
+        "sender": "bot",
+        "text":
+            "Olá ${usuario!.nomeRazao.split(' ').first}, descreva o seu problema para que eu possa criar um chamado.",
+      });
+      firstMsg = true;
+    }
   }
 
   Future<void> _getResponse() async {
@@ -33,10 +44,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     setState(() => _controller.clear());
     if (text.isEmpty) return;
 
-    final reply = await _openAIService.sendMessage(
-      text, 
-      usuario!.id!,
-    );
+    final reply = await _chamadoController.criarChamado(text, usuario!.id!)
+        ? sucessMessage
+        : failMessage;
     setState(() => _response = reply);
   }
 
@@ -47,7 +57,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     setState(() {
       _messages.add({"sender": "user", "text": text});
       isLoading = true;
-      _messages.add({"sender": "bot", "text": 'thinking',});
+      _messages.add({"sender": "bot", "text": 'thinking'});
     });
 
     await _getResponse();
@@ -57,7 +67,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       _messages.add({"sender": "bot", "text": _response});
       _messages.add({
         "sender": "bot",
-        "text":''
+        "text":
+            ''
             "Tem mais algum problema que você queira descrever ${usuario!.nomeRazao.split(' ').first}?",
       });
       isLoading = false;
@@ -66,18 +77,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final usuario =
-        ModalRoute.of(context)!.settings.arguments as UsuarioBase;
-
-    // Manda a primeira mensagem
-    while (!firstMsg) {
-      _messages.add({
-        "sender": "bot",
-        "text":''
-            "Olá ${usuario.nomeRazao.split(' ').first}, descreva o seu problema para que eu possa criar um chamado.",
-      });
-      firstMsg = true;
-    }
+    // final usuario = ModalRoute.of(context)!.settings.arguments as UsuarioBase;
 
     return Scaffold(
       appBar: AppBar(title: const Text("TechHelp")),
@@ -96,7 +96,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                       ? Alignment.centerRight
                       : Alignment.centerLeft,
                   child: Container(
-                    constraints: BoxConstraints(maxWidth: 280),
+                    constraints: BoxConstraints(
+                      maxWidth: (PlatformUtils.isMobile) ? 280 : 540,
+                    ),
                     margin: const EdgeInsets.symmetric(vertical: 4),
                     padding: const EdgeInsets.symmetric(
                       vertical: 10,
@@ -106,10 +108,12 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                       color: isUser ? AppColors.primary : AppColors.darkBlue,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: msg["text"] == 'thinking' ? TypingIndicator(color: Colors.white) : Text(
-                      msg["text"] ?? "",
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
+                    child: msg["text"] == 'thinking'
+                        ? TypingIndicator(color: Colors.white)
+                        : Text(
+                            msg["text"] ?? "",
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
                   ),
                 );
               },
@@ -122,6 +126,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
               children: [
                 Expanded(
                   child: TextField(
+                    maxLines: 3, // Permite que cresça para baixo
+                    minLines: 1, // Altura inicial
+                    keyboardType: TextInputType.multiline,
                     controller: _controller,
                     decoration: InputDecoration(
                       hintText: "Digite sua mensagem...",

@@ -6,10 +6,13 @@ import '../widgets/chamado_widget.dart';
 import '../../services/api_service.dart';
 import '../../utils/app_colors.dart';
 
+enum Options { my, all }
+
 class ChamadosList extends StatefulWidget {
   final UsuarioBase user;
+  final Options options;
 
-  const ChamadosList({super.key, required this.user});
+  const ChamadosList({super.key, required this.user, required this.options});
 
   @override
   State<ChamadosList> createState() => _ChamadosListState();
@@ -21,20 +24,44 @@ class _ChamadosListState extends State<ChamadosList> {
   @override
   void initState() {
     super.initState();
-    _futureGetAll = ApiService().getAll(
-      '/Chamados/Cliente/${widget.user.cpfCnpj}',
-      ChamadoModel.fromMap,
-    );
+    if (widget.options == Options.my) {
+      _futureGetAll = !isTecnico()
+          ? ApiService().getAll(
+              '/Chamados/Cliente/${widget.user.cpfCnpj}',
+              ChamadoModel.fromMap,
+            )
+          : ApiService().getAll(
+              '/Chamados/Tecnico/${widget.user.id}',
+              ChamadoModel.fromMap,
+            );
+    }
+    if (widget.options == Options.all) {
+      _futureGetAll = ApiService().getAll('/Chamados/', ChamadoModel.fromMap);
+    }
   }
 
   Future<void> refreshGetAll() async {
     setState(() {
-      _futureGetAll = ApiService().getAll(
-        '/Chamados/Cliente/${widget.user.cpfCnpj}',
-        ChamadoModel.fromMap,
-      );
+      if (widget.options == Options.my) {
+        _futureGetAll = !isTecnico()
+            ? ApiService().getAll(
+                '/Chamados/Cliente/${widget.user.cpfCnpj}',
+                ChamadoModel.fromMap,
+              )
+            : ApiService().getAll(
+                '/Chamados/Tecnico/${widget.user.id}',
+                ChamadoModel.fromMap,
+              );
+      }
+      if (widget.options == Options.all) {
+        _futureGetAll = ApiService().getAll('/Chamados/', ChamadoModel.fromMap);
+      }
     });
     await _futureGetAll;
+  }
+
+  bool isTecnico() {
+    return widget.user.cpfCnpj == '';
   }
 
   @override
@@ -46,7 +73,9 @@ class _ChamadosListState extends State<ChamadosList> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Meus Chamados",
+                widget.options == Options.my
+                    ? "Meus Chamados"
+                    : "Todos os Chamados",
                 style: TextStyle(
                   color: AppColors.text,
                   fontSize: 32,
@@ -88,12 +117,13 @@ class _ChamadosListState extends State<ChamadosList> {
                               ),
                             );
                           } else {
-                            List<ChamadoModel> listAccounts = snapshot.data!;
+                            List<ChamadoModel> listChamados = snapshot.data!;
                             return ListView.builder(
-                              itemCount: listAccounts.length,
+                              itemCount: listChamados.length,
                               itemBuilder: (context, index) {
                                 return ChamadoWidget(
-                                  chamado: listAccounts[index],
+                                  user: widget.user,
+                                  chamado: listChamados[index],
                                 );
                               },
                             );

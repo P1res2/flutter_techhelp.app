@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_techhelp_app/app/models/cliente_model.dart';
+import 'package:flutter_techhelp_app/app/models/usuario_base_model.dart';
 import '../models/tecnico_model.dart';
 import '../services/auth_service.dart';
 
@@ -18,39 +19,24 @@ class AuthController {
   }
 
   // Faz login
-  Future<void> login({
-    required TipoUsuario tipo,
-    required String email,
-    required String password,
-  }) async {
-    switch (tipo) {
-      case TipoUsuario.cliente:
-        ClienteModel? user = await AuthService<ClienteModel>().login(
-          email: email,
-          password: password,
-          sufixUrl: '/Clientes/',
-          fromJson: ClienteModel.fromMapWithId,
-        );
+  Future<void> login({required String email, required String password}) async {
+    UsuarioBase? user = await AuthService<UsuarioBase>().login(
+      email: email,
+      password: password,
+    );
 
-        if (user != null) {
-          navigator.pushNamed('/home', arguments: user);
-        } else {
-          messenger.showSnackBar(
-            SnackBar(
-              content: Text("Essa conta não existe ou a senha está errada."),
-            ),
-          );
-        }
-        break;
-
-      case TipoUsuario.tecnico:
-        await AuthService<TecnicoModel>().login(
-          email: email,
-          password: password,
-          sufixUrl: '/Tecnicos/',
-          fromJson: TecnicoModel.fromMap,
-        );
-        break;
+    if (user != null) {
+      if (user.cpfCnpj == '') {
+        navigator.pushNamed('/homeTecnico', arguments: user);
+      } else {
+        navigator.pushNamed('/home', arguments: user);
+      }
+    } else {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text("Essa conta não existe ou a senha está errada."),
+        ),
+      );
     }
   }
 
@@ -58,6 +44,7 @@ class AuthController {
 
   Future<void> logout() async {
     await _authService.logout();
+    navigator.pop();
     navigator.pop();
     navigator.pop();
   }

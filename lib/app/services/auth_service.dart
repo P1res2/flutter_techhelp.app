@@ -1,3 +1,7 @@
+import 'package:flutter_techhelp_app/app/models/cliente_model.dart';
+import 'package:collection/collection.dart';
+import '../models/tecnico_model.dart';
+
 import '../models/usuario_base_model.dart';
 import 'api_service.dart';
 
@@ -8,20 +12,31 @@ class AuthService<T extends UsuarioBase> {
   T? get currentUser => _currentUser;
 
   // Faz login
-  Future<T?> login({
-    required String email,
-    required String password,
-    required String sufixUrl,
-    required T Function(Map<String, dynamic>) fromJson,
-  }) async {
-    final List<T> users = await _apiService.getAll<T>(sufixUrl, fromJson);
+  Future<T?> login({required String email, required String password}) async {
+    final List<ClienteModel> clientes = await _apiService.getAll<ClienteModel>(
+      '/Clientes/',
+      ClienteModel.fromMapWithId,
+    );
+    final List<TecnicoModel> tecnicos = await _apiService.getAll<TecnicoModel>(
+      '/Tecnicos/',
+      TecnicoModel.fromMapWithId,
+    );
 
-    for (var user in users) {
-      print(user.id);
-      if (user.email == email && user.password == password) {
-        _currentUser = user;
-        return user;
-      }
+    if (await _tecnicoEmailIsRegister(email)) {
+      final tecnicoUser = tecnicos.firstWhere(
+        (t) => t.email == email && t.password == password,
+      );
+      _currentUser = tecnicoUser as T;
+      return tecnicoUser as T;
+    } else if (await _clienteEmailIsRegister(email)) {
+      final clienteUser = clientes.firstWhereOrNull(
+        (c) => c.email == email && c.password == password,
+      );
+
+      if (clienteUser == null) return null;
+
+      _currentUser = clienteUser as T;
+      return clienteUser as T;
     }
     return null;
   }
@@ -40,6 +55,9 @@ class AuthService<T extends UsuarioBase> {
   }) async {
     final List<T> users = await _apiService.getAll<T>(sufixUrl, fromJson);
 
+    // Verifica se o email ja esta cadastrado como tecnico
+    if (await _tecnicoEmailIsRegister(novoUsuario.email)) return false;
+
     // verifica se o email ou cpf/cnpj ja está cadastrado
     for (var user in users) {
       if (user.email == novoUsuario.email) return false;
@@ -48,5 +66,23 @@ class AuthService<T extends UsuarioBase> {
 
     await _apiService.post<T>(sufixUrl, novoUsuario.toMap());
     return true;
+  }
+
+  Future<bool> _tecnicoEmailIsRegister(String email) async {
+    final List<TecnicoModel> tecnicos = await _apiService.getAll<TecnicoModel>(
+      '/Tecnicos/',
+      TecnicoModel.fromMap,
+    );
+
+    return tecnicos.any((t) => t.email == email);
+  }
+
+  Future<bool> _clienteEmailIsRegister(String email) async {
+    final List<ClienteModel> clientes = await _apiService.getAll<ClienteModel>(
+      '/Clientes/',
+      ClienteModel.fromMap,
+    );
+
+    return clientes.any((c) => c.email == email);
   }
 }

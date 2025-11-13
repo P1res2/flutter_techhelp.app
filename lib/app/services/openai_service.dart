@@ -1,16 +1,15 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import '../services/api_service.dart';
 
 class OpenAIService {
   final String _apiKey = dotenv.env['API_KEY'] ?? '';
-  final ApiService _apiService = ApiService();
 
-  Future<String> sendMessage(String msg, int idCliente) async {
-    final url = Uri.parse("https://api.openai.com/v1/chat/completions");
-    const String sucessMessage = 'Eu criei um chamado para você, em breve um técnico entrara em contato para solucionar o seu problema. Confira a sua página inicial para ver os seus chamados.';
-    const String failMessage = 'Não foi possivel criar o seu chamado no momento, tente novamente mais tarde.';
+  Future<Map<String, dynamic>> sendMessage(String msg, int idCliente) async {
+    final url = Uri.parse(
+      "https://api.openai.com/v1/chat/completions",
+    ); // API url
+
     String message =
         """Você é um assistente que transforma mensagens de usuários em um objeto JSON padronizado para abertura de chamados técnicos.
 
@@ -73,17 +72,10 @@ Entrada:
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      try {
-        await _apiService.post(
-          '/Chamados/',
-          json.decode(data["choices"][0]["message"]["content"]),
-        );
-      } on Exception {
-        return failMessage;
-      }
-      return sucessMessage;
+
+      return json.decode(data["choices"][0]["message"]["content"]);
     } else {
-      return failMessage;
+      throw Exception();
     }
   }
 }
