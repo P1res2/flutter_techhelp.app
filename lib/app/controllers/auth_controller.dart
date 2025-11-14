@@ -19,17 +19,30 @@ class AuthController {
   }
 
   // Faz login
-  Future<void> login({required String email, required String password}) async {
-    UsuarioBase? user = await AuthService<UsuarioBase>().login(
-      email: email,
-      password: password,
-    );
+  Future<bool> login({required String email, required String password}) async {
+    UsuarioBase? user;
+    try {
+      user = await AuthService<UsuarioBase>().login(
+        email: email,
+        password: password,
+      );
+    } on Exception {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text("Não foi possivel entrar, tente novamente mais tarde."),
+        ),
+      );
+    }
 
     if (user != null) {
       if (user.cpfCnpj == '') {
         navigator.pushNamed('/homeTecnico', arguments: user);
+        messenger.showSnackBar(SnackBar(content: Text('Seja bem vindo ${user.nomeRazao}')));
+        return true;
       } else {
         navigator.pushNamed('/home', arguments: user);
+        messenger.showSnackBar(SnackBar(content: Text('Seja bem vindo ${user.nomeRazao}')));
+        return true;
       }
     } else {
       messenger.showSnackBar(
@@ -37,6 +50,7 @@ class AuthController {
           content: Text("Essa conta não existe ou a senha está errada."),
         ),
       );
+      return false;
     }
   }
 

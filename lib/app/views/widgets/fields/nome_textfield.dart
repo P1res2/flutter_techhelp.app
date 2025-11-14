@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class NomeTextfield extends StatelessWidget {
-  TextEditingController controller;
-  bool readOnly = false;
+  final TextEditingController controller;
+  final bool readOnly;
 
-  NomeTextfield({super.key, required this.controller, required this.readOnly});
+  const NomeTextfield({super.key, required this.controller, this.readOnly = false});
 
   @override
   Widget build(BuildContext context) {

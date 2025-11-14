@@ -1,4 +1,5 @@
 class ChamadoModel {
+  final int? idChamado;
   final int idCliente;
   final int? idTecnico;
   final String titulo;
@@ -9,6 +10,7 @@ class ChamadoModel {
   final String categoria;
 
   ChamadoModel({
+    this.idChamado,
     required this.idCliente,
     this.idTecnico,
     required this.titulo,
@@ -32,6 +34,7 @@ class ChamadoModel {
 
   factory ChamadoModel.fromMap(Map<String, dynamic> map) {
     return ChamadoModel(
+      idChamado: map['id_chamado'],
       idCliente: map['id_cliente'],
       idTecnico: map['id_tecnico'],
       titulo: map['titulo'],

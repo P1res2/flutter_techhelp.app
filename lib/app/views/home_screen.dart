@@ -13,7 +13,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-enum HomePages { perfil, meusChamados} // paginas
+enum HomePages { perfil, meusChamados } // paginas
 
 class _HomeScreenState extends State<HomeScreen> {
   HomePages _selected = HomePages.meusChamados;
@@ -23,7 +23,10 @@ class _HomeScreenState extends State<HomeScreen> {
       case HomePages.perfil:
         return ProfileScreen(user: usuario);
       case HomePages.meusChamados:
-        return ChamadosList(user: usuario, options: Options.my);
+        return ChamadosList(
+          user: usuario,
+          options: Options.my,
+        );
     }
   }
 

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'widgets/textfields/cpf_cnpj_textfield.dart';
-import 'widgets/textfields/email_textfield.dart';
-import 'widgets/textfields/nome_textfield.dart';
-import 'widgets/textfields/password_textfield.dart';
-import 'widgets/textfields/telefone_textfield.dart';
+import '../utils/constants.dart';
+import 'widgets/fields/app_dropdown_button_form_field.dart';
+import 'widgets/fields/cpf_cnpj_textfield.dart';
+import 'widgets/fields/email_textfield.dart';
+import 'widgets/fields/nome_textfield.dart';
+import 'widgets/fields/password_textfield.dart';
+import 'widgets/fields/telefone_textfield.dart';
 import '../utils/validators.dart';
-import '../views/widgets/account_type_dropdownbutton.dart';
 import '../controllers/auth_controller.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -59,7 +60,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       Row(
                         children: [
                           Expanded(
-                            child: NomeTextfield(controller: _nomeController, readOnly: false,),
+                            child: NomeTextfield(controller: _nomeController),
                           ),
                           const SizedBox(width: 16),
                           Expanded(
@@ -82,8 +83,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           const SizedBox(width: 16),
                           Expanded(
-                            child: AccountTypeDropdown(
+                            child: AppDropdownButtonFormField(
+                              title: 'Cpf/Cnpj',
                               value: _accountType,
+                              itens: tiposContas,
                               onChanged: (newValue) {
                                 setState(() {
                                   _accountType = newValue;
@@ -103,7 +106,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           Expanded(
                             child: EmailTextfield(
                               controller: _emailController,
-                              readOnly: false,
                             ),
                           ),
                         ],
@@ -116,14 +118,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           Expanded(
                             child: PasswordTextfield(
                               controller: _senha1Controller,
-                              readOnly: false,
                             ),
                           ),
                           const SizedBox(width: 16),
                           Expanded(
                             child: PasswordTextfield(
                               controller: _senha2Controller,
-                              readOnly: false,
                             ),
                           ),
                         ],

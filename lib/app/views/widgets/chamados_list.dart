@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_techhelp_app/app/models/chamado_model.dart';
 import 'package:flutter_techhelp_app/app/models/usuario_base_model.dart';
 import 'package:flutter_techhelp_app/app/utils/plataform_utils.dart';
-import '../widgets/chamado_widget.dart';
+import 'chamado_card.dart';
 import '../../services/api_service.dart';
 import '../../utils/app_colors.dart';
 
@@ -22,6 +22,15 @@ class _ChamadosListState extends State<ChamadosList> {
   late Future<List<ChamadoModel>> _futureGetAll;
 
   @override
+  void didUpdateWidget(covariant ChamadosList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    setState(() {
+      refreshGetAll();
+    });
+  }
+
+  @override
   void initState() {
     super.initState();
     if (widget.options == Options.my) {
@@ -36,7 +45,10 @@ class _ChamadosListState extends State<ChamadosList> {
             );
     }
     if (widget.options == Options.all) {
-      _futureGetAll = ApiService().getAll('/Chamados/', ChamadoModel.fromMap);
+      _futureGetAll = ApiService().getAll(
+        '/Chamados/Abertos/',
+        ChamadoModel.fromMap,
+      );
     }
   }
 
@@ -54,7 +66,10 @@ class _ChamadosListState extends State<ChamadosList> {
               );
       }
       if (widget.options == Options.all) {
-        _futureGetAll = ApiService().getAll('/Chamados/', ChamadoModel.fromMap);
+        _futureGetAll = ApiService().getAll(
+          '/Chamados/Abertos/',
+          ChamadoModel.fromMap,
+        );
       }
     });
     await _futureGetAll;
@@ -107,13 +122,23 @@ class _ChamadosListState extends State<ChamadosList> {
                       case ConnectionState.done:
                         {
                           if (snapshot.data == null || snapshot.data!.isEmpty) {
-                            return const Center(
-                              child: Text(
-                                "Nenhum chamado encontrado",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 24,
-                                ),
+                            return Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "Nenhum chamado encontrado",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                    ),
+                                  ),
+                                  if (PlatformUtils.isMobile)
+                                    IconButton(
+                                      onPressed: refreshGetAll,
+                                      icon: Icon(Icons.refresh),
+                                    ),
+                                ],
                               ),
                             );
                           } else {
@@ -121,9 +146,12 @@ class _ChamadosListState extends State<ChamadosList> {
                             return ListView.builder(
                               itemCount: listChamados.length,
                               itemBuilder: (context, index) {
-                                return ChamadoWidget(
+                                return ChamadoCard(
                                   user: widget.user,
                                   chamado: listChamados[index],
+                                  onUpdate: () {
+                                    refreshGetAll();
+                                  },
                                 );
                               },
                             );

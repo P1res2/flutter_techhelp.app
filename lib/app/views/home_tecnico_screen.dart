@@ -13,7 +13,7 @@ class HomeTecnicoScreen extends StatefulWidget {
   State<HomeTecnicoScreen> createState() => _HomeTecnicoScreenState();
 }
 
-enum HomeTecnicoPages { perfil, meusChamados, todosChamados} // Páginas
+enum HomeTecnicoPages { perfil, meusChamados, todosChamados } // Páginas
 
 class _HomeTecnicoScreenState extends State<HomeTecnicoScreen> {
   HomeTecnicoPages _selected = HomeTecnicoPages.todosChamados;

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 class EmailTextfield extends StatelessWidget {
   final TextEditingController controller;
-  bool readOnly = false;
+  final bool readOnly;
 
-  EmailTextfield({super.key, required this.controller, required this.readOnly});
+  const EmailTextfield({super.key, required this.controller, this.readOnly = false});
 
   @override
   Widget build(BuildContext context) {

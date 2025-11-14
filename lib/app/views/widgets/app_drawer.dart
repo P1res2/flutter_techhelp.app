@@ -30,7 +30,11 @@ class AppDrawer extends StatelessWidget {
                         style: TextStyle(color: Colors.white, fontSize: 24),
                       ),
                       Text(
-                        user.cpfCnpj == '' ? 'Técnico' : 'Cliente',
+                        user.cpfCnpj == ''
+                            ? user.id! == 1
+                                  ? 'Técnico Admin'
+                                  : 'Técnico'
+                            : 'Cliente',
                         style: TextStyle(fontSize: 12, color: Colors.white),
                       ),
                     ],

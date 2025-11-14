@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_techhelp_app/app/controllers/chamado_controller.dart';
 import 'package:flutter_techhelp_app/app/models/chamado_model.dart';
 import 'package:flutter_techhelp_app/app/models/tecnico_model.dart';
 import 'package:flutter_techhelp_app/app/models/usuario_base_model.dart';
@@ -6,11 +7,21 @@ import 'package:flutter_techhelp_app/app/utils/app_colors.dart';
 import 'package:flutter_techhelp_app/app/views/widgets/edit_chamado_widget.dart';
 import '../../services/api_service.dart';
 
-class ChamadoWidget extends StatelessWidget {
+class ChamadoCard extends StatelessWidget {
   final ApiService _apiService = ApiService();
+  final ChamadoController chamadoController = ChamadoController();
   final ChamadoModel chamado;
   final UsuarioBase user;
-  ChamadoWidget({super.key, required this.chamado, required this.user});
+  late final NavigatorState navigator;
+  late final ScaffoldMessengerState messenger;
+  final VoidCallback onUpdate;
+
+  ChamadoCard({
+    super.key,
+    required this.chamado,
+    required this.user,
+    required this.onUpdate,
+  });
 
   Future<TecnicoModel> _getTecnico() async {
     return await _apiService.getBy(
@@ -19,12 +30,21 @@ class ChamadoWidget extends StatelessWidget {
     );
   }
 
+  Future<bool> _selecteChamado() async {
+    return await chamadoController.editarChamado({
+      "id_tecnico": user.id,
+    }, chamado.idChamado!);
+  }
+
   @override
   Widget build(BuildContext context) {
+    navigator = Navigator.of(context);
+    messenger = ScaffoldMessenger.of(context);
+
     return Padding(
       padding: const EdgeInsets.all(12.0),
       child: Container(
-        height: 110,
+        height: 130,
         decoration: BoxDecoration(
           color: Colors.white70,
           borderRadius: BorderRadius.circular(10),
@@ -35,7 +55,7 @@ class ChamadoWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                flex: 3,
+                flex: 6,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -55,7 +75,7 @@ class ChamadoWidget extends StatelessWidget {
                       chamado.descricao,
                       style: TextStyle(fontSize: 12),
                       overflow: TextOverflow.clip,
-                      maxLines: 3,
+                      maxLines: 4,
                       softWrap: true,
                     ),
                   ],
@@ -65,7 +85,7 @@ class ChamadoWidget extends StatelessWidget {
               VerticalDivider(),
 
               Expanded(
-                flex: 1,
+                flex: 3,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -84,9 +104,7 @@ class ChamadoWidget extends StatelessWidget {
                     SizedBox(height: 8),
 
                     chamado.idTecnico == null
-                        ? const Text(
-                            'Técnico: Sem técnico',
-                          )
+                        ? const Text('Técnico: Sem técnico')
                         : FutureBuilder(
                             future:
                                 _getTecnico(), // retorna Future<TecnicoModel>
@@ -109,18 +127,37 @@ class ChamadoWidget extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          IconButton(
-                            onPressed: () => showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              builder: (context) => EditChamadoWidget(),
+                          if (chamado.idTecnico == user.id)
+                            IconButton(
+                              onPressed: () => showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                builder: (context) => EditChamadoCard(
+                                  user: user,
+                                  chamado: chamado,
+                                  onUpdate: () {
+                                    onUpdate();
+                                  },
+                                ),
+                              ),
+                              icon: Icon(Icons.edit, color: Colors.white),
                             ),
-                            icon: Icon(Icons.edit, color: Colors.white),
-                          ),
-                          IconButton(
-                            onPressed: () {},
-                            icon: Icon(Icons.add, color: Colors.white),
-                          ),
+                          if (chamado.idTecnico == null && user.id != null)
+                            IconButton(
+                              onPressed: () async {
+                                if (await _selecteChamado()) {
+                                  messenger.showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Chamado atribuido ao Técnico: ${user.nomeRazao}',
+                                      ),
+                                    ),
+                                  );
+                                  onUpdate();
+                                }
+                              },
+                              icon: Icon(Icons.add, color: Colors.white),
+                            ),
                         ],
                       ),
                   ],

@@ -5,6 +5,7 @@ import '../utils/constants.dart';
 class ApiService {
   final String _prefixUrlApi = prefixUrlApi;
 
+  // Get one
   Future<T> getBy<T>(
     String sufixUrl,
     T Function(Map<String, dynamic>) fromMap,

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../controllers/cliente_controller.dart';
 import '../controllers/tecnico_controller.dart';
-import '../views/widgets/textfields/password_textfield.dart';
-import '../views/widgets/textfields/nome_textfield.dart';
-import 'widgets/textfields/email_textfield.dart';
+import 'widgets/fields/password_textfield.dart';
+import 'widgets/fields/nome_textfield.dart';
+import 'widgets/fields/email_textfield.dart';
 import '../models/usuario_base_model.dart';
 import '../utils/plataform_utils.dart';
 

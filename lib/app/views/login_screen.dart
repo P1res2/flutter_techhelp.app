@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'widgets/textfields/email_textfield.dart';
-import 'widgets/textfields/password_textfield.dart';
+import 'widgets/fields/email_textfield.dart';
+import 'widgets/fields/password_textfield.dart';
 import '../utils/validators.dart';
 import '../controllers/auth_controller.dart';
 
@@ -40,11 +40,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   constraints: BoxConstraints(maxWidth: 350, minWidth: 200),
                   child: Column(
                     children: [
-                      EmailTextfield(controller: _emailController, readOnly: false,),
+                      EmailTextfield(controller: _emailController),
 
                       const SizedBox(height: 16), // ESPAÇAMENTO
 
-                      PasswordTextfield(controller: _senhaController, readOnly: false,),
+                      PasswordTextfield(controller: _senhaController),
 
                       const SizedBox(height: 32), // ESPAÇAMENTO
 
