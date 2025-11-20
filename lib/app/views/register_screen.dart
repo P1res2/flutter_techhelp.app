@@ -104,9 +104,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       Row(
                         children: [
                           Expanded(
-                            child: EmailTextfield(
-                              controller: _emailController,
-                            ),
+                            child: EmailTextfield(controller: _emailController),
                           ),
                         ],
                       ),
@@ -197,7 +195,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               )) {
                                 return;
                               }
-                              
+
                               // Valida se o checho box de Cpf/Cnpj está marcado
                               if (!cpfCheck) {
                                 // Se não marcou, mostra alerta
@@ -245,18 +243,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
         isLoading = true;
       });
 
-      await authController.register(
+      if (await authController.register(
         tipo: TipoUsuario.cliente,
         sufixUrl: '/Clientes/',
         dados: {
-          "nome_razao": _nomeController.text,
+          "nome_razao": _nomeController.text.trim(),
           "telefone": _telefoneController.text,
           "cpf_cnpj": _cpfCnpjController.text,
           "tipo": _accountType,
-          "email": _emailController.text,
+          "email": _emailController.text.trim().toLowerCase(),
           "senha": _senha1Controller.text,
         },
-      );
+      )) {
+        _nomeController.clear();
+        _telefoneController.clear();
+        _cpfCnpjController.clear();
+        _accountType = "Fisica";
+        _emailController.clear();
+        _senha1Controller.clear();
+        _senha2Controller.clear();
+        cpfCheck = false;
+      }
 
       setState(() {
         isLoading = false;

@@ -113,10 +113,13 @@ class _LoginScreenState extends State<LoginScreen> {
         isLoading = true;
       });
 
-      await authController.login(
-        email: _emailController.text,
+      if (await authController.login(
+        email: _emailController.text.trim().toLowerCase(),
         password: _senhaController.text,
-      );
+      )) {
+        _emailController.clear();
+        _senhaController.clear();
+      }
 
       setState(() {
         isLoading = false;

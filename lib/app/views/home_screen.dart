@@ -22,6 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
     switch (page) {
       case HomePages.perfil:
         return ProfileScreen(user: usuario);
+        
       case HomePages.meusChamados:
         return ChamadosList(
           user: usuario,

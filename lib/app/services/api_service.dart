@@ -71,4 +71,22 @@ class ApiService {
       throw Exception('Falha na requisição: $e');
     }
   }
+
+  // Delete
+  Future<bool> delete<T>(String sufixUrl) async {
+    try {
+      final response = await http.delete(
+        Uri.parse("$_prefixUrlApi$sufixUrl"),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode.toString()[0] != '2') {
+        return false;
+      }
+
+      return true;
+    } on Exception {
+      return false;
+    }
+  }
 }

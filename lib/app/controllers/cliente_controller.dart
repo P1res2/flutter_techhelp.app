@@ -18,9 +18,28 @@ class ClienteController {
     required Map<String, dynamic> map,
   }) async {
     if (await _apiService.patch('/clientes/$idCliente', map)) {
-      messenger.showSnackBar(SnackBar(content: Text('Dados Atualizados com sucesso! Saia e entre novamente para ver as atualizações.')));
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            'Dados Atualizados com sucesso! Saia e entre novamente para ver as atualizações.',
+          ),
+        ),
+      );
       return true;
     }
+    return false;
+  }
+
+  Future<bool> apagarCliente({required int idCliente}) async {
+    if (await _apiService.delete('/clientes/$idCliente')) {
+      navigator.pop();
+      navigator.pop();
+      messenger.showSnackBar(
+        SnackBar(content: Text('Conta deletada com sucesso.')),
+      );
+      return true;
+    }
+    messenger.showSnackBar(SnackBar(content: Text('Não foi possivel apagar.')));
     return false;
   }
 }

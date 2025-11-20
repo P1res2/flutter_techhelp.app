@@ -25,7 +25,7 @@ class AuthService<T extends UsuarioBase> {
     }
 
     if (await _tecnicoIsRegister(email, password)) {
-      TecnicoModel? tecnicoUser = tecnicos.firstWhere(
+      TecnicoModel? tecnicoUser = tecnicos.firstWhereOrNull(
         (t) => t.email == email && t.password == password,
       );
       _currentUser = tecnicoUser as T;
@@ -58,13 +58,12 @@ class AuthService<T extends UsuarioBase> {
     final List<T> users = await _apiService.getAll<T>(sufixUrl, fromJson);
 
     // Verifica se o email ja esta cadastrado como tecnico
-    if (await _tecnicoIsRegister(novoUsuario.email, novoUsuario.password))
-      return false;
+    if (await _tecnicoIsRegister(novoUsuario.email, novoUsuario.password)) return false;
 
     // verifica se o email ou cpf/cnpj ja está cadastrado
     for (var user in users) {
       if (user.email == novoUsuario.email) return false;
-      if (user.cpfCnpj == novoUsuario.cpfCnpj) return false;
+      if (user.cpfCnpj == novoUsuario.cpfCnpj && novoUsuario.cpfCnpj != '') return false;
     }
 
     await _apiService.post<T>(sufixUrl, novoUsuario.toMap());

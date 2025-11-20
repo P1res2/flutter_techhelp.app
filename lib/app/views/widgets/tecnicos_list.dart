@@ -1,28 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_techhelp_app/app/models/chamado_model.dart';
+import 'package:flutter_techhelp_app/app/models/Tecnico_model.dart';
 import 'package:flutter_techhelp_app/app/models/usuario_base_model.dart';
 import 'package:flutter_techhelp_app/app/utils/plataform_utils.dart';
-import 'chamado_card.dart';
 import '../../services/api_service.dart';
 import '../../utils/app_colors.dart';
+import 'tecnico_card.dart';
 
-enum Options { my, all }
-
-class ChamadosList extends StatefulWidget {
+class TecnicosList extends StatefulWidget {
   final UsuarioBase user;
-  final Options options;
 
-  const ChamadosList({super.key, required this.user, required this.options});
+  const TecnicosList({super.key, required this.user});
 
   @override
-  State<ChamadosList> createState() => _ChamadosListState();
+  State<TecnicosList> createState() => _TecnicosListState();
 }
 
-class _ChamadosListState extends State<ChamadosList> {
-  late Future<List<ChamadoModel>> _futureGetAll;
+class _TecnicosListState extends State<TecnicosList> {
+  late Future<List<TecnicoModel>> _futureGetAll;
 
   @override
-  void didUpdateWidget(covariant ChamadosList oldWidget) {
+  void didUpdateWidget(covariant TecnicosList oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     setState(() {
@@ -33,60 +30,21 @@ class _ChamadosListState extends State<ChamadosList> {
   @override
   void initState() {
     super.initState();
-    if (widget.options == Options.my) {
-      _futureGetAll = !isTecnico()
-          ? ApiService().getAll(
-              '/Chamados/Cliente/${widget.user.cpfCnpj}',
-              ChamadoModel.fromMap,
-            )
-          : ApiService().getAll(
-              '/Chamados/Tecnico/${widget.user.id}',
-              ChamadoModel.fromMap,
-            );
-    }
-    if (widget.options == Options.all) {
-      _futureGetAll = widget.user.id != 1
-          ? getChamadosAbertos()
-          : ApiService().getAll('/Chamados/Abertos/', ChamadoModel.fromMap);
-    }
-  }
 
-  Future<List<ChamadoModel>> getChamadosAbertos() async {
-    List<ChamadoModel> chamadosAbertos = await ApiService().getAll(
-      '/Chamados/Abertos/',
-      ChamadoModel.fromMap,
+    _futureGetAll = ApiService().getAll(
+      '/Tecnicos/',
+      TecnicoModel.fromMapWithId,
     );
-    List<ChamadoModel> chamadosFiltrados = chamadosAbertos
-        .where((c) => c.idTecnico == null)
-        .toList();
-
-    return chamadosFiltrados;
   }
 
   Future<void> refreshGetAll() async {
     setState(() {
-      if (widget.options == Options.my) {
-        _futureGetAll = !isTecnico()
-            ? ApiService().getAll(
-                '/Chamados/Cliente/${widget.user.cpfCnpj}',
-                ChamadoModel.fromMap,
-              )
-            : ApiService().getAll(
-                '/Chamados/Tecnico/${widget.user.id}',
-                ChamadoModel.fromMap,
-              );
-      }
-      if (widget.options == Options.all) {
-        _futureGetAll = widget.user.id != 1
-            ? getChamadosAbertos()
-            : ApiService().getAll('/Chamados/Abertos/', ChamadoModel.fromMap);
-      }
+      _futureGetAll = ApiService().getAll(
+        '/Tecnicos/',
+        TecnicoModel.fromMapWithId,
+      );
     });
     await _futureGetAll;
-  }
-
-  bool isTecnico() {
-    return widget.user.cpfCnpj == '';
   }
 
   @override
@@ -98,7 +56,7 @@ class _ChamadosListState extends State<ChamadosList> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                widget.options == Options.my ? "Meus Chamados" : "Chamados",
+                "Tecnicos",
                 style: TextStyle(
                   color: AppColors.text,
                   fontSize: 32,
@@ -135,7 +93,7 @@ class _ChamadosListState extends State<ChamadosList> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    "Nenhum chamado encontrado",
+                                    "Nenhum Tecnico encontrado",
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 24,
@@ -150,13 +108,13 @@ class _ChamadosListState extends State<ChamadosList> {
                               ),
                             );
                           } else {
-                            List<ChamadoModel> listChamados = snapshot.data!;
+                            List<TecnicoModel> listTecnicos = snapshot.data!;
                             return ListView.builder(
-                              itemCount: listChamados.length,
+                              itemCount: listTecnicos.length,
                               itemBuilder: (context, index) {
-                                return ChamadoCard(
+                                return TecnicoCard(
                                   user: widget.user,
-                                  chamado: listChamados[index],
+                                  tecnico: listTecnicos[index],
                                   onUpdate: () {
                                     refreshGetAll();
                                   },

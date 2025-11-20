@@ -44,7 +44,7 @@ class ChamadoCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(12.0),
       child: Container(
-        height: 130,
+        constraints: BoxConstraints(minHeight: 130),
         decoration: BoxDecoration(
           color: Colors.white70,
           borderRadius: BorderRadius.circular(10),
@@ -68,21 +68,24 @@ class ChamadoCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      "Status: ${chamado.status}",
-                      style: TextStyle(fontSize: 10),
+                      "Status: ${chamado.status!} | Categoria: ${chamado.categoria} | Tipo de atendimento: ${chamado.tipoAtendimento}",
+                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
                     ),
+                    
+                    Divider(indent: 0, thickness: 1, height: 5,),
+
                     Text(
                       chamado.descricao,
                       style: TextStyle(fontSize: 12),
                       overflow: TextOverflow.clip,
-                      maxLines: 4,
+                      maxLines: 5,
                       softWrap: true,
                     ),
                   ],
                 ),
               ),
 
-              VerticalDivider(),
+              VerticalDivider(width: 7,),
 
               Expanded(
                 flex: 3,
@@ -104,21 +107,21 @@ class ChamadoCard extends StatelessWidget {
                     SizedBox(height: 8),
 
                     chamado.idTecnico == null
-                        ? const Text('Técnico: Sem técnico')
+                        ? const Text('Técnico: Sem técnico', style: TextStyle(fontSize: 12),)
                         : FutureBuilder(
                             future:
                                 _getTecnico(), // retorna Future<TecnicoModel>
                             builder: (context, snapshot) {
                               if (snapshot.connectionState ==
                                   ConnectionState.waiting) {
-                                return const Text('Carregando técnico...');
+                                return const Text('Carregando técnico...', style: TextStyle(fontSize: 12),);
                               } else if (snapshot.hasError) {
-                                return const Text('Erro ao carregar técnico');
+                                return const Text('Erro ao carregar técnico', style: TextStyle(fontSize: 12),);
                               } else if (!snapshot.hasData) {
-                                return const Text('Nenhum técnico encontrado');
+                                return const Text('Nenhum técnico encontrado', style: TextStyle(fontSize: 12),);
                               } else {
                                 final tecnico = snapshot.data!;
-                                return Text('Técnico: ${tecnico.nomeRazao}');
+                                return Text('Técnico: ${tecnico.nomeRazao}', style: TextStyle(fontSize: 12),);
                               }
                             },
                           ),

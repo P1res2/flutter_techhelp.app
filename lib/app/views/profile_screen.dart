@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../controllers/cliente_controller.dart';
 import '../controllers/tecnico_controller.dart';
+import '../utils/app_colors.dart';
 import 'widgets/fields/password_textfield.dart';
 import 'widgets/fields/nome_textfield.dart';
 import 'widgets/fields/email_textfield.dart';
@@ -20,9 +21,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController _nomeController = TextEditingController();
-
   final TextEditingController _emailController = TextEditingController();
-
   final TextEditingController _senhaController = TextEditingController();
 
   bool editing = false;
@@ -61,7 +60,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SizedBox(),
+                      editing && widget.user!.id != 1
+                          ? IconButton(
+                              onPressed: () {
+                                _showConfimation(context);
+                              },
+                              icon: Icon(Icons.delete, color: AppColors.error),
+                            )
+                          : IconButton(
+                              onPressed: null,
+                              icon: Icon(
+                                Icons.delete,
+                                color: AppColors.textLight,
+                              ),
+                            ),
                       Column(
                         children: [
                           Text(
@@ -139,6 +151,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showConfimation(BuildContext context) {
+    showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Quer apagar mesmo?'),
+        content: const Text(
+          'Se você clicar em apagar não tem mais volta.',
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'Cancel'),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final ClienteController clienteController = ClienteController(
+                context: context,
+              );
+              final TecnicoController tecnicoController = TecnicoController(
+                context: context,
+              );
+
+              widget.user!.cpfCnpj == ''
+                  ? tecnicoController.apagarTecnico(idTecnico: widget.user!.id!)
+                  : clienteController.apagarCliente(
+                      idCliente: widget.user!.id!,
+                    );
+              Navigator.pop(context);
+              Navigator.pop(context);
+            },
+            child: const Text('Apagar', style: TextStyle(color: Colors.red),),
+          ),
+        ],
       ),
     );
   }

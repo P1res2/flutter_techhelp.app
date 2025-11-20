@@ -46,6 +46,7 @@ class TecnicoModel implements UsuarioBase {
       email: map['email'],
       telefone: map['telefone'],
       password: map['senha'],
+      ativo: map['ativo'],
       especialidades: map['especialidades']
     );
   }
@@ -53,8 +54,9 @@ class TecnicoModel implements UsuarioBase {
   @override
   Map<String, dynamic> toMap() => {
     "nome": nomeRazao,
-    "email": cpfCnpj,
-    "telefone": email,
+    "email": email,
+    "telefone": telefone,
     "senha": password,
+    "ids_especialidades" : idsEspecialidades,
   };
 }

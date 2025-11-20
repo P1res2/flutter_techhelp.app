@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_techhelp_app/app/models/cliente_model.dart';
-import 'package:flutter_techhelp_app/app/models/usuario_base_model.dart';
+import '../models/cliente_model.dart';
+import '../models/usuario_base_model.dart';
 import '../models/tecnico_model.dart';
 import '../services/auth_service.dart';
 
@@ -32,16 +32,21 @@ class AuthController {
           content: Text("Não foi possivel entrar, tente novamente mais tarde."),
         ),
       );
+      return false;
     }
 
     if (user != null) {
       if (user.cpfCnpj == '') {
         navigator.pushNamed('/homeTecnico', arguments: user);
-        messenger.showSnackBar(SnackBar(content: Text('Seja bem vindo ${user.nomeRazao}')));
+        messenger.showSnackBar(
+          SnackBar(content: Text('Seja bem vindo ${user.nomeRazao}')),
+        );
         return true;
       } else {
         navigator.pushNamed('/home', arguments: user);
-        messenger.showSnackBar(SnackBar(content: Text('Seja bem vindo ${user.nomeRazao}')));
+        messenger.showSnackBar(
+          SnackBar(content: Text('Seja bem vindo ${user.nomeRazao}')),
+        );
         return true;
       }
     } else {
@@ -64,7 +69,7 @@ class AuthController {
   }
 
   // Registra um usuario
-  Future<void> register({
+  Future<bool> register({
     required TipoUsuario tipo,
     required String sufixUrl,
     required Map<String, dynamic> dados,
@@ -80,27 +85,41 @@ class AuthController {
         )) {
           messenger.showSnackBar(
             SnackBar(
-              content: Text("A sua conta foi criada com sucesso! Faça login."),
+              content: Text(
+                "A sua conta foi criada com sucesso ${novoCliente.nomeRazao.split(' ').first} Faça login.",
+              ),
             ),
           );
+
           navigator.pop();
+          return true;
         } else {
           messenger.showSnackBar(
             SnackBar(
               content: Text("Email ou Cpf/Cnpj já existe, tente fazer login."),
             ),
           );
+          return false;
         }
-        break;
 
       case TipoUsuario.tecnico:
         final novoUsuario = TecnicoModel.fromMap(dados);
 
-        await _authService.register(
+        if (await _authService.register(
           sufixUrl: sufixUrl,
           novoUsuario: novoUsuario,
           fromJson: TecnicoModel.fromMap,
-        );
+        )) {
+          messenger.showSnackBar(
+            SnackBar(content: Text("A conta foi criada com sucesso!")),
+          );
+          return true;
+        } else {
+          messenger.showSnackBar(
+            SnackBar(content: Text("Esse email já existe.")),
+          );
+          return false;
+        }
     }
   }
 }
